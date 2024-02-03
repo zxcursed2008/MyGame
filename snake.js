@@ -1,35 +1,62 @@
 var blockSize = 60;
+
+
 var rows = 20;
 var cols = 20;
+
+
 var board;
+
+
 var context;
+
+
 var snakeX = blockSize * 5;
 var snakeY = blockSize * 5;
+
+
 var velocityX = 0;
 var velocityY = 0;
+
+
 var snakeBody = [];
+
+
 var foodX;
 var foodY;
+
+
 var gameOver = false;
+
+
 var score = 0;
-var time = 0; // Added time variable
+
+
+var time = 0; 
+
 
 window.onload = function() {
+    
     board = document.getElementById("board");
+    
     board.height = rows * blockSize;
+    
     board.width = cols * blockSize;
+    
     context = board.getContext("2d");
 
     placeFood();
     document.addEventListener("keyup", changeDirection);
 
     setInterval(update, 1000 / 10);
-    setInterval(updateTime, 1000); // Update time every second
+    setInterval(updateTime, 1000); 
 }
 
 function update() {
+    
     if (gameOver) {
         return;
+
     }
 
     context.fillStyle = "black";
@@ -37,6 +64,7 @@ function update() {
 
     context.fillStyle = "red";
     context.fillRect(foodX, foodY, blockSize, blockSize);
+    
 
     if (snakeX == foodX && snakeY == foodY) {
         snakeBody.push([foodX, foodY]);
@@ -77,37 +105,57 @@ function update() {
 }
 
 function changeDirection(e) {
+    
     if (e.code == "ArrowUp" && velocityY != 1) {
+        
         velocityX = 0;
         velocityY = -1;
-    } else if (e.code == "ArrowDown" && velocityY != -1) {
+        
+    } 
+    else if (e.code == "ArrowDown" && velocityY != -1) {
+        
         velocityX = 0;
         velocityY = 1;
-    } else if (e.code == "ArrowLeft" && velocityX != 1) {
+        
+    } 
+    else if (e.code == "ArrowLeft" && velocityX != 1) {
+        
         velocityX = -1;
         velocityY = 0;
-    } else if (e.code == "ArrowRight" && velocityX != -1) {
+        
+    } 
+    else if (e.code == "ArrowRight" && velocityX != -1) {
+        
         velocityX = 1;
         velocityY = 0;
+        
     }
 }
 
 function placeFood() {
+    
     foodX = Math.floor(Math.random() * cols) * blockSize;
     foodY = Math.floor(Math.random() * rows) * blockSize;
 }
 
 function updateScore() {
+    
     document.getElementById("score").innerHTML = "Score: " + score;
 }
 
 function updateTime() {
+    
     time++;
     document.getElementById("time").innerHTML = "Time: " + formatTime(time);
 }
 
 function formatTime(seconds) {
+    
     var minutes = Math.floor(seconds / 60);
+    
     var remainingSeconds = seconds % 60;
+    
     return minutes + " хв " + remainingSeconds + " с";
+
+    
 }
