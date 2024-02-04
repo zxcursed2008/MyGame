@@ -1,91 +1,62 @@
-var blockSize = 60;  // Розмір кожного блоку у грі.
+// Розмір блоку та розміри поля
+var blockSize = 60;
+var rows = 20;
+var cols = 20;
+var board;
+var context;
 
-var rows = 20;  // Кількість рядків на полі гри.
-var cols = 20;  // Кількість стовпчиків на полі гри.
+// Початкові координати змійки
+var snakeX = blockSize * 5;
+var snakeY = blockSize * 5;
 
-var board;  // Поле гри.
-var context;  // Контекст малювання для поля гри.
+// Початкова швидкість змійки
+var velocityX = 0;
+var velocityY = 0;
 
-var snakeX = blockSize * 5;  // Початкова координата X голови змії.
-var snakeY = blockSize * 5;  // Початкова координата Y голови змії.
+// Тіло змійки та координати їжі
+var snakeBody = [];
+var foodX;
+var foodY;
 
-var velocityX = 0;  // Початкова швидкість змії по вісі X.
-var velocityY = 0;  // Початкова швидкість змії по вісі Y.
+// Флаг завершення гри та рахунок
+var gameOver = false;
+var score = 0;
 
-var snakeBody = [];  // Масив для зберігання координат тіла змії.
+// Час гри
+var time = 0;
 
-var foodX;  // Координата X їжі на полі гри.
-var foodY;  // Координата Y їжі на полі гри.
-
-var gameOver = false;  // Прапорець, що вказує, чи закінчилася гра.
-
-var score = 0;  // Рахунок гравця.
-
-var time = 0;  // Час гри у секундах.
-
-window.onload = function () {
-    // Отримання елементів гри та ініціалізація.
+// Викликається при завантаженні сторінки
+window.onload = function() {
+    // Отримання елементів canvas та контексту для малювання
     board = document.getElementById("board");
     board.height = rows * blockSize;
     board.width = cols * blockSize;
     context = board.getContext("2d");
 
-    // Розміщення їжі та додавання обробників подій.
+    // Розміщення першої їжі та встановлення обробника натискання клавіш
     placeFood();
-    document.addEventListener("keyup", handleKeyup);
+    document.addEventListener("keyup", changeDirection);
 
-    // Встановлення інтервалів для оновлення гри та часу.
+    // Запуск інтервалів оновлення гри та часу гри
     setInterval(update, 1000 / 10);
-    setInterval(updateTime, 1000);
+    setInterval(updateTime, 1000); // Оновлення часу кожну секунду
 }
 
-// Обробник події натискання клавіші.
-function handleKeyup(e) {
-    if (e.code === "Space") {
-        restartGame();
-    } else {
-        changeDirection(e);
-    }
-}
-
-// Функція для рестарту гри.
-function restartGame() {
-    // Скидання параметрів гравця та гри.
-    snakeX = blockSize * 5;
-    snakeY = blockSize * 5;
-    velocityX = 0;
-    velocityY = 0;
-    snakeBody = [];
-    foodX = undefined;
-    foodY = undefined;
-    gameOver = false;
-    score = 0;
-    time = 0;
-
-    // Очищення поля гри та розміщення нової їжі.
-    context.clearRect(0, 0, board.width, board.height);
-    placeFood();
-
-    // Оновлення рахунку та часу гри.
-    updateScore();
-    updateTime();
-}
-
-// Функція для оновлення стану гри.
+// Оновлення стану гри
 function update() {
     if (gameOver) {
         return;
     }
 
-    // Очищення поля гри.
+    // Очистка поля
     context.fillStyle = "black";
     context.fillRect(0, 0, board.width, board.height);
 
-    // Малювання їжі.
+    // Виведення їжі
     context.fillStyle = "red";
     context.fillRect(foodX, foodY, blockSize, blockSize);
 
-    // Логіка збільшення рахунку та оновлення координат змії при з'їданні їжі.
+    // Логіка при з'їданні їжі
     if (snakeX == foodX && snakeY == foodY) {
         snakeBody.push([foodX, foodY]);
         placeFood();
@@ -93,41 +64,43 @@ function update() {
         updateScore();
     }
 
-    // Логіка для руху тіла змії.
+    // Зміщення тіла змійки
     for (let i = snakeBody.length - 1; i > 0; i--) {
         snakeBody[i] = snakeBody[i - 1];
     }
 
-    // Переміщення голови змії.
+    // Оновлення координат голови змійки
     if (snakeBody.length) {
         snakeBody[0] = [snakeX, snakeY];
     }
 
-    // Малювання голови змії та її тіла.
+    // Виведення голови змійки
     context.fillStyle = "lime";
     snakeX += velocityX * blockSize;
     snakeY += velocityY * blockSize;
     context.fillRect(snakeX, snakeY, blockSize, blockSize);
 
+    // Виведення тіла змійки
     for (let i = 0; i < snakeBody.length; i++) {
         context.fillRect(snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
     }
 
-    // Логіка завершення гри при виході за межі поля чи зіткненні з тілом змії.
+    // Перевірка на зіткнення змійки з краєм поля
     if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize) {
         gameOver = true;
-        alert("Гру закінчено! Ваш рахунок: " + score + "\nЧас гри: " + formatTime(time) + "\nНатисніть кнопку Space 2 рази, щоб почати гру спочатку.");
+        displayGameOver();
     }
 
+    // Перевірка на зіткнення змійки з власним тілом
     for (let i = 0; i < snakeBody.length; i++) {
         if (snakeX == snakeBody[i][0] && snakeY == snakeBody[i][1]) {
             gameOver = true;
-            alert("Гру закінчено! Ваш рахунок: " + score + "\nЧас гри: " + formatTime(time) + "\nНатисніть кнопку Space 2 рази, щоб почати гру спочатку.");
+            displayGameOver();
         }
     }
 }
 
-// Функція для зміни напрямку руху змії.
+// Зміна напрямку руху змійки
 function changeDirection(e) {
     if (e.code == "ArrowUp" && velocityY != 1) {
         velocityX = 0;
@@ -144,26 +117,74 @@ function changeDirection(e) {
     }
 }
 
-// Функція для розміщення їжі на полі гри.
+// Розміщення нової їжі
 function placeFood() {
     foodX = Math.floor(Math.random() * cols) * blockSize;
     foodY = Math.floor(Math.random() * rows) * blockSize;
 }
 
-// Функція для оновлення рахунку гравця.
+// Оновлення виводу рахунку
 function updateScore() {
     document.getElementById("score").innerHTML = "Score: " + score;
 }
 
-// Функція для оновлення часу гри.
+// Оновлення часу гри
 function updateTime() {
     time++;
     document.getElementById("time").innerHTML = "Time: " + formatTime(time);
 }
 
-// Функція для форматування часу у хвилини та секунди.
+// Форматування часу з секунд у хвилини та секунди
 function formatTime(seconds) {
     var minutes = Math.floor(seconds / 60);
     var remainingSeconds = seconds % 60;
     return minutes + " хв " + remainingSeconds + " с";
+}
+// Додайте обробник події для натискання клавіші пробіл
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+        // Перезапуск гри
+        restartGame();
+    }
+});
+
+
+// Виведення повідомлення "Game Over" на екрані
+function displayGameOver() {
+    context.fillStyle = "black";
+    context.fillRect(0, 0, board.width, board.height);
+
+    
+    context.fillStyle = "white";
+    context.font = "50px Arial";
+    context.textAlign = "center";
+    context.fillText("Гру Закінчено!", board.width / 2, board.height / 2);
+    context.font = "25px Arial";
+    context.fillText("Кількість з'їдених яблучок: " + score, board.width / 2, board.height / 2 + 35);
+    context.fillText("Час гри: " + formatTime(time), board.width / 2, board.height / 2 + 60);
+    context.font = "20px Arial";
+    context.fillText("Натисніть кнопку Space щоб почати гру спочатку", board.width / 2, board.height / 2 + 100);
+    
+    
+}
+
+// Функція для перезапуску гри
+function restartGame() {
+    // Скидання всіх значень на початкові
+    snakeX = blockSize * 5;
+    snakeY = blockSize * 5;
+    velocityX = 0;
+    velocityY = 0;
+    snakeBody = [];
+    gameOver = false;
+    score = 0;
+    time = 0;
+
+    // Очистка поля та розміщення нової їжі
+    context.clearRect(0, 0, board.width, board.height);
+    placeFood();
+
+    // Оновлення виводу рахунку та часу
+    updateScore();
+    updateTime();
 }
