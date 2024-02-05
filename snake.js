@@ -1,6 +1,5 @@
 // Розмір блоку та розміри поля
-//kuhnu
-var blockSize = 45;
+var blockSize = 38;
 var rows = 20;
 var cols = 20;
 var board;
@@ -26,8 +25,14 @@ var score = 0;
 // Час гри
 var time = 0;
 
+var appleImage = new Image();
+appleImage.src = 'assets/apple-image.png';
+
+
+
+
 // Викликається при завантаженні сторінки
-window.onload = function() {
+    window.onload = function() {
     // Отримання елементів canvas та контексту для малювання
     board = document.getElementById("board");
     board.height = rows * blockSize;
@@ -54,8 +59,8 @@ function update() {
     context.fillRect(0, 0, board.width, board.height);
 
     // Виведення їжі
-    context.fillStyle = "red";
-    context.fillRect(foodX, foodY, blockSize, blockSize);
+    context.drawImage(appleImage, foodX, foodY, blockSize , blockSize )
+
 
     // Логіка при з'їданні їжі
     if (snakeX == foodX && snakeY == foodY) {
@@ -122,6 +127,9 @@ function changeDirection(e) {
 function placeFood() {
     foodX = Math.floor(Math.random() * cols) * blockSize;
     foodY = Math.floor(Math.random() * rows) * blockSize;
+
+    // Малюємо малюнок яблучка
+    context.drawImage(appleImage, foodX, foodY, blockSize, blockSize);
 }
 
 // Оновлення виводу рахунку
