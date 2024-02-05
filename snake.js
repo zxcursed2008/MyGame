@@ -1,4 +1,5 @@
 // Розмір блоку та розміри поля
+//kuhnu
 var blockSize = 45;
 var rows = 20;
 var cols = 20;
