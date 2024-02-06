@@ -29,6 +29,14 @@ var appleImage = new Image();
 appleImage.src = 'assets/apple-image.png';
 
 
+var snakeeImage = new Image();
+snakeeImage.src = 'assets/snake-image.png';
+
+var bodyyImage = new Image();
+bodyyImage.src = 'assets/body-image.png';
+
+
+
 
 
 // Викликається при завантаженні сторінки
@@ -81,14 +89,23 @@ function update() {
     }
 
     // Виведення голови змійки
-    context.fillStyle = "lime";
+
+
+   
     snakeX += velocityX * blockSize;
     snakeY += velocityY * blockSize;
     context.fillRect(snakeX, snakeY, blockSize, blockSize);
 
+
+    context.drawImage(snakeeImage, snakeX, snakeY, blockSize, blockSize);
+
+
     // Виведення тіла змійки
     for (let i = 0; i < snakeBody.length; i++) {
         context.fillRect(snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
+        
+
+        context.drawImage(bodyyImage, snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
     }
 
     // Перевірка на зіткнення змійки з краєм поля
